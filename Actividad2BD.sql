@@ -1,0 +1,229 @@
+CREATE TABLE categories ( category_id SERIAL PRIMARY KEY, category_name VARCHAR(255) NOT NULL ); 
+CREATE TABLE products ( product_id SERIAL PRIMARY KEY, product_name VARCHAR(100) NOT NULL, foto VARCHAR(250), model_year SMALLINT NOT NULL, price NUMERIC(10,2) NOT NULL, category_id INTEGER NOT NULL, FOREIGN KEY (category_id) REFERENCES categories(category_id) ); 
+CREATE TABLE stores ( store_id SERIAL PRIMARY KEY, store_name VARCHAR(100) NOT NULL, phone VARCHAR(25), email VARCHAR(100) NOT NULL, street VARCHAR(50), city VARCHAR(50), state VARCHAR(25), estado VARCHAR(20) NOT NULL ); 
+CREATE TABLE stocks ( store_id INTEGER NOT NULL, product_id INTEGER NOT NULL, quantity INTEGER NOT NULL, PRIMARY KEY (store_id, product_id), FOREIGN KEY (store_id) REFERENCES stores(store_id), FOREIGN KEY (product_id) REFERENCES products(product_id) ); 
+CREATE TABLE customers ( customer_id SERIAL PRIMARY KEY, first_name VARCHAR(100) NOT NULL, last_name VARCHAR(100) NOT NULL, foto VARCHAR(250), phone VARCHAR(25), email VARCHAR(100) NOT NULL, street VARCHAR(50), city VARCHAR(50), state VARCHAR(25) ); 
+CREATE TABLE usuarios ( user_id SERIAL PRIMARY KEY, usuario VARCHAR(50) NOT NULL UNIQUE, clave VARCHAR(255) NOT NULL, email VARCHAR(100) NOT NULL UNIQUE, role VARCHAR(255) NOT NULL ); 
+CREATE TABLE orders ( order_id SERIAL PRIMARY KEY, customer_id INTEGER NOT NULL, order_date DATE NOT NULL, user_id INTEGER NOT NULL, estado VARCHAR(25) NOT NULL, total_amount NUMERIC(10,2) NOT NULL, FOREIGN KEY (customer_id) REFERENCES customers(customer_id), FOREIGN KEY (user_id) REFERENCES usuarios(user_id) ); 
+CREATE TABLE order_items ( order_items_id SERIAL PRIMARY KEY, order_id INTEGER NOT NULL, product_id INTEGER NOT NULL, quantity INTEGER NOT NULL, price NUMERIC(10,2) NOT NULL, discount NUMERIC(4,2) NOT NULL, FOREIGN KEY (order_id) REFERENCES orders(order_id), FOREIGN KEY (product_id) REFERENCES products(product_id) );
+
+
+\dt
+
+ALTER TABLE products
+RENAME CONSTRAINT products_pkey TO PK_products;
+
+ALTER TABLE stores
+RENAME CONSTRAINT stores_pkey TO PK_stores;
+
+ALTER TABLE stocks
+RENAME CONSTRAINT stocks_pkey TO PK_stocks;
+
+ALTER TABLE customers
+RENAME CONSTRAINT customers_pkey TO PK_customers;
+
+ALTER TABLE usuarios
+RENAME CONSTRAINT usuarios_pkey TO PK_usuarios;
+
+ALTER TABLE orders
+RENAME CONSTRAINT orders_pkey TO PK_orders;
+
+ALTER TABLE order_items
+RENAME CONSTRAINT order_items_pkey TO PK_order_items;
+
+\d orders
+
+ALTER TABLE products
+RENAME CONSTRAINT products_category_id_fkey 
+TO FK_products_categories;
+
+ALTER TABLE stocks
+RENAME CONSTRAINT stocks_store_id_fkey 
+TO FK_stocks_stores;
+
+ALTER TABLE stocks
+RENAME CONSTRAINT stocks_product_id_fkey 
+TO FK_stocks_products;
+
+ALTER TABLE orders
+RENAME CONSTRAINT orders_customer_id_fkey 
+TO FK_orders_customers;
+
+ALTER TABLE orders
+RENAME CONSTRAINT orders_user_id_fkey 
+TO FK_orders_usuarios;
+
+ALTER TABLE order_items
+RENAME CONSTRAINT order_items_order_id_fkey 
+TO FK_order_items_orders;
+
+ALTER TABLE order_items
+RENAME CONSTRAINT order_items_product_id_fkey 
+TO FK_order_items_products;
+
+\d orders
+
+ALTER TABLE products
+ADD CONSTRAINT CHK_products_price
+CHECK (price > 0);
+
+ALTER TABLE stocks
+ADD CONSTRAINT CHK_stocks_quantity
+CHECK (quantity >= 0);
+
+ALTER TABLE order_items
+ADD CONSTRAINT CHK_order_items_discount
+CHECK (discount >= 0 AND discount <= 100);
+
+Run
+
+Explain
+
+Analyze
+849ms
+
+
+\d orders
+
+ALTER TABLE categories
+ADD CONSTRAINT UQ_categories_category_name
+UNIQUE (category_name);
+
+ALTER TABLE customers
+ADD CONSTRAINT UQ_customers_email
+UNIQUE (email);
+
+ALTER TABLE stores
+ADD CONSTRAINT UQ_stores_email
+UNIQUE (email);
+
+ALTER TABLE orders
+ALTER COLUMN order_date
+SET DEFAULT CURRENT_DATE;
+
+ALTER TABLE orders
+ALTER COLUMN estado
+SET DEFAULT 'pendiente';
+
+ALTER TABLE stores
+ALTER COLUMN estado
+SET DEFAULT 'activo';
+
+ALTER TABLE stocks
+ALTER COLUMN quantity
+SET DEFAULT 0;
+
+ALTER TABLE order_items
+ALTER COLUMN discount
+SET DEFAULT 0;
+
+INSERT INTO categories (category_name) VALUES
+('MTB'),
+('Ruta'),
+('Urbana'),
+('Gravel'),
+('BMX'),
+('Eléctrica'),
+('Infantil'),
+('Accesorios'),
+('Repuestos'),
+('Fitness');
+
+INSERT INTO stores (store_name, phone, email, street, city, state)
+VALUES
+('Store 1','70011111','store1@mail.com','Av 1','SC','SC'),
+('Store 2','70022222','store2@mail.com','Av 2','SC','SC'),
+('Store 3','70033333','store3@mail.com','Av 3','LP','LP'),
+('Store 4','70044444','store4@mail.com','Av 4','CBBA','CB'),
+('Store 5','70055555','store5@mail.com','Av 5','SC','SC'),
+('Store 6','70066666','store6@mail.com','Av 6','SC','SC'),
+('Store 7','70077777','store7@mail.com','Av 7','SC','SC'),
+('Store 8','70088888','store8@mail.com','Av 8','SC','SC'),
+('Store 9','70099999','store9@mail.com','Av 9','SC','SC'),
+('Store 10','70100000','store10@mail.com','Av 10','SC','SC');
+
+INSERT INTO customers (first_name, last_name, phone, email, street, city, state)
+VALUES
+('Juan','Perez','60011111','juan@mail.com','Calle 1','SC','SC'),
+('Maria','Lopez','60022222','maria@mail.com','Calle 2','SC','SC'),
+('Carlos','Gomez','60033333','carlos@mail.com','Calle 3','LP','LP'),
+('Ana','Torres','60044444','ana@mail.com','Calle 4','CB','CB'),
+('Luis','Rojas','60055555','luis@mail.com','Calle 5','SC','SC'),
+('Sofia','Mendez','60066666','sofia@mail.com','Calle 6','SC','SC'),
+('Pedro','Vargas','60077777','pedro@mail.com','Calle 7','SC','SC'),
+('Lucia','Herrera','60088888','lucia@mail.com','Calle 8','SC','SC'),
+('Miguel','Castro','60099999','miguel@mail.com','Calle 9','SC','SC'),
+('Elena','Morales','60100000','elena@mail.com','Calle 10','SC','SC');
+
+INSERT INTO usuarios (usuario, clave, email, role)
+VALUES
+('admin1','123','admin1@mail.com','admin'),
+('vendedor1','123','v1@mail.com','vendedor'),
+('vendedor2','123','v2@mail.com','vendedor'),
+('vendedor3','123','v3@mail.com','vendedor'),
+('vendedor4','123','v4@mail.com','vendedor'),
+('vendedor5','123','v5@mail.com','vendedor'),
+('vendedor6','123','v6@mail.com','vendedor'),
+('vendedor7','123','v7@mail.com','vendedor'),
+('vendedor8','123','v8@mail.com','vendedor'),
+('vendedor9','123','v9@mail.com','vendedor');
+
+INSERT INTO products (product_name, model_year, price, category_id)
+VALUES
+('Bike A',2024,500,1),
+('Bike B',2024,700,2),
+('Bike C',2023,800,3),
+('Bike D',2022,600,4),
+('Bike E',2024,900,5),
+('Bike F',2023,750,6),
+('Bike G',2022,400,7),
+('Bike H',2024,300,8),
+('Bike I',2023,200,9),
+('Bike J',2024,1000,10);
+
+INSERT INTO stocks (store_id, product_id, quantity)
+VALUES
+(1,1,10),
+(2,2,15),
+(3,3,20),
+(4,4,5),
+(5,5,8),
+(6,6,12),
+(7,7,9),
+(8,8,30),
+(9,9,7),
+(10,10,11);
+
+SELECT product_id FROM products ORDER BY product_id;
+
+SELECT product_id FROM products;
+SELECT * FROM products;
+SELECT * FROM categories;
+
+INSERT INTO products (product_name, model_year, price, category_id)
+VALUES
+('Bike A',2024,500,1),
+('Bike B',2024,700,2),
+('Bike C',2023,800,3),
+('Bike D',2022,600,4),
+('Bike E',2024,900,5),
+('Bike F',2023,750,6),
+('Bike G',2022,400,7),
+('Bike H',2024,300,8),
+('Bike I',2023,200,9),
+('Bike J',2024,1000,10);
+
+SELECT * FROM products;
+
+INSERT INTO stocks (store_id, product_id, quantity)
+VALUES
+(1,1,10),
+(2,2,15),
+(3,3,20),
+(4,4,5),
+(5,5,8),
+(6,6,12),
+(7,7,9),
+(8,8,30),
+(9,9,7),
+(10,10,11);
